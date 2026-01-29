@@ -1,0 +1,43 @@
+{
+  "name": "swagger-zod-api-params",
+  "version": "1.0.0",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "swagger",
+    "zod",
+    "api",
+    "params",
+    "query",
+    "path",
+    "header",
+    "cookie",
+    "body",
+    "decorator",
+    "nestjs",
+    "typescript"
+  ],
+  "author": "Guilherme da Matta",
+  "license": "ISC",
+  "description": "Swagger Zod API Params is a library that helps you to create API params using Zod schemas.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damattag/swagger-zod-api-params"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.12",
+    "@nestjs/swagger": "11.2.5",
+    "zod": "4.3.6"
+  }
+}
