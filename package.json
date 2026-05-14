@@ -1,14 +1,15 @@
 {
   "name": "swagger-zod-api-params",
   "version": "1.0.0",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "swagger",
@@ -31,13 +32,19 @@
     "type": "git",
     "url": "https://github.com/damattag/swagger-zod-api-params"
   },
-  "devDependencies": {
-    "typescript": "5.9.3",
-    "vitest": "4.0.18"
+  "engines": {
+    "node": ">=18"
   },
-  "dependencies": {
-    "@nestjs/common": "11.1.12",
-    "@nestjs/swagger": "11.2.5",
-    "zod": "4.3.6"
+  "peerDependencies": {
+    "@nestjs/common": ">=10",
+    "@nestjs/swagger": ">=7",
+    "zod": ">=4"
+  },
+  "devDependencies": {
+    "@nestjs/common": "11.1.21",
+    "@nestjs/swagger": "11.4.3",
+    "typescript": "6.0.3",
+    "vitest": "4.1.6",
+    "zod": "4.4.3"
   }
 }

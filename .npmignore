@@ -1,0 +1,6 @@
+src/
+*.tsbuildinfo
+tsconfig*.json
+.npmrc
+node_modules/
+.git/
