@@ -1,14 +1,14 @@
-# swagger-zod-api-params
+# nest-swagger-zod
 
-[![npm version](https://img.shields.io/npm/v/swagger-zod-api-params.svg)](https://www.npmjs.com/package/swagger-zod-api-params)
-[![license](https://img.shields.io/npm/l/swagger-zod-api-params.svg)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/nest-swagger-zod.svg)](https://www.npmjs.com/package/nest-swagger-zod)
+[![license](https://img.shields.io/npm/l/nest-swagger-zod.svg)](./LICENSE)
 
 A NestJS decorator library that generates Swagger `@ApiQuery` decorators automatically from your [Zod](https://zod.dev) schemas.
 
 ## Installation
 
 ```bash
-npm install swagger-zod-api-params
+npm install nest-swagger-zod
 ```
 
 ### Peer Dependencies
@@ -25,7 +25,7 @@ Define your query params as a Zod schema, convert it to JSON Schema, and pass it
 
 ```typescript
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQueryParams } from 'swagger-zod-api-params';
+import { ApiQueryParams } from 'nest-swagger-zod';
 import { z } from 'zod';
 
 const SearchSchema = z.object({
