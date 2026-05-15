@@ -1,50 +1,58 @@
 {
-  "name": "nest-swagger-zod",
-  "version": "1.0.1",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build"
-  },
-  "keywords": [
-    "swagger",
-    "zod",
-    "api",
-    "params",
-    "query",
-    "path",
-    "header",
-    "cookie",
-    "body",
-    "decorator",
-    "nestjs",
-    "typescript"
-  ],
-  "author": "Guilherme da Matta",
-  "license": "ISC",
-  "description": "Swagger Zod API Params is a library that helps you to create API params using Zod schemas.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damattag/swagger-zod-api-params"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "peerDependencies": {
-    "@nestjs/common": ">=10",
-    "@nestjs/swagger": ">=7",
-    "zod": ">=4"
-  },
-  "devDependencies": {
-    "@nestjs/common": "11.1.21",
-    "@nestjs/swagger": "11.4.3",
-    "typescript": "6.0.3",
-    "vitest": "4.1.6",
-    "zod": "4.4.3"
-  }
+	"name": "nest-swagger-zod",
+	"version": "1.0.1",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"test": "vitest run",
+		"test:cov": "vitest run --coverage",
+		"lint:check": "biome check .",
+		"lint:fix": "biome check --write .",
+		"prepublishOnly": "npm run build"
+	},
+
+	"keywords": [
+		"swagger",
+		"zod",
+		"api",
+		"params",
+		"query",
+		"path",
+		"header",
+		"cookie",
+		"body",
+		"decorator",
+		"nestjs",
+		"typescript"
+	],
+	"author": "Guilherme da Matta",
+	"license": "ISC",
+	"description": "Swagger Zod API Params is a library that helps you to create API params using Zod schemas.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/damattag/swagger-zod-api-params"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"peerDependencies": {
+		"@nestjs/common": ">=10",
+		"@nestjs/swagger": ">=7"
+	},
+	"dependencies": {
+		"@nestjs/common": ">=10",
+		"@nestjs/swagger": ">=7"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.15",
+		"@vitest/coverage-v8": "4.1.6",
+		"typescript": "6.0.3",
+		"vitest": "4.1.6",
+		"zod": "4.4.3"
+	}
 }

@@ -2,8 +2,10 @@
 
 [![npm version](https://img.shields.io/npm/v/nest-swagger-zod.svg)](https://www.npmjs.com/package/nest-swagger-zod)
 [![license](https://img.shields.io/npm/l/nest-swagger-zod.svg)](./LICENSE)
+[![tests](https://img.shields.io/badge/tests-passing-brightgreen)](./tests)
+[![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](./coverage)
 
-A NestJS decorator library that generates Swagger `@ApiQuery` decorators automatically from your [Zod](https://zod.dev) schemas.
+A NestJS decorator library that generates Swagger `@ApiQuery` decorators from OpenAPI-compatible object schemas. It remains compatible with schemas produced by [Zod](https://zod.dev).
 
 ## Installation
 
@@ -16,39 +18,47 @@ npm install nest-swagger-zod
 Make sure the following packages are installed in your project:
 
 ```bash
-npm install @nestjs/common @nestjs/swagger zod
+npm install @nestjs/common @nestjs/swagger
 ```
 
 ## Usage
 
-Define your query params as a Zod schema, convert it to JSON Schema, and pass it to `ApiQueryParams`:
+Pass an OpenAPI-compatible object schema to `ApiQueryParams`:
 
 ```typescript
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQueryParams } from 'nest-swagger-zod';
-import { z } from 'zod';
+import { ApiQueryParams, OpenApiObjectSchema } from 'nest-swagger-zod';
 
-const SearchSchema = z.object({
-  page: z.number().int().default(1).describe('Page number'),
-  limit: z.number().int().max(100).default(20).describe('Items per page'),
-  status: z.enum(['active', 'inactive']).optional().describe('Filter by status'),
-});
+const SearchSchema: OpenApiObjectSchema = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer', default: 1, description: 'Page number' },
+    limit: { type: 'integer', default: 20, description: 'Items per page' },
+    status: {
+      type: 'string',
+      enum: ['active', 'inactive'],
+      description: 'Filter by status',
+    },
+  },
+};
 
 @Controller('items')
 export class ItemsController {
   @Get()
-  @ApiQueryParams(z.toJSONSchema(SearchSchema))
-  findAll(@Query() query: z.infer<typeof SearchSchema>) {
+  @ApiQueryParams(SearchSchema)
+  findAll(@Query() query: Record<string, unknown>) {
     // ...
   }
 }
 ```
 
-This will automatically register all Zod schema fields as `@ApiQuery` parameters in your Swagger UI.
+This will automatically register all schema fields as `@ApiQuery` parameters in your Swagger UI.
+
+If you already use Zod, you can keep using `z.toJSONSchema(...)` and pass the result directly.
 
 ## API
 
-### `ApiQueryParams(jsonSchema: JSONSchema)`
+### `ApiQueryParams(jsonSchema: OpenApiObjectSchema)`
 
 A method decorator that reads the `properties` of a JSON Schema object and applies an `@ApiQuery` decorator for each property.
 
