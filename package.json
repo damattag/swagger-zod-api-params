@@ -1,6 +1,6 @@
 {
 	"name": "nest-swagger-zod",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
@@ -15,7 +15,6 @@
 		"lint:fix": "biome check --write .",
 		"prepublishOnly": "npm run build"
 	},
-
 	"keywords": [
 		"swagger",
 		"zod",
