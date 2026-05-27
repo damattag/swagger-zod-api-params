@@ -1,6 +1,5 @@
 import {
 	type ArgumentMetadata,
-	BadRequestException,
 	Injectable,
 	type PipeTransform,
 } from '@nestjs/common';
@@ -14,25 +13,22 @@ type ZodDtoLike = {
 export class ZodValidationPipe implements PipeTransform {
 	transform(value: unknown, metadata: ArgumentMetadata) {
 		const metatype = metadata.metatype as ZodDtoLike | undefined;
-		const schema = metatype?.schema;
+
+		if (!metatype || this.isPrimitive(metatype)) {
+			return value;
+		}
+
+		const schema = metatype.schema;
 
 		if (!schema) {
 			throw new Error('Schema not found');
 		}
 
-		const result = schema.safeParse(value);
+		return schema.parse(value);
+	}
 
-		if (!result.success) {
-			throw new BadRequestException({
-				message: 'Validation failed',
-				errors: result.error.issues.map((issue) => ({
-					path: issue.path.join('.'),
-					message: issue.message,
-					code: issue.code,
-				})),
-			});
-		}
-
-		return result.data;
+	private isPrimitive(metatype: unknown): boolean {
+		const primitives = [String, Number, Boolean, Array, Object];
+		return primitives.includes(metatype as never);
 	}
 }

@@ -100,10 +100,13 @@ export function createZodDto<T = Record<string, unknown>>(
 	const keys = Object.keys(input?.properties ?? {});
 	const requiredKeys = input?.required ?? [];
 
-	// biome-ignore lint/complexity/noStaticOnlyClass: it's necessary
-	class DynamicDto {
-		public static readonly schema = schema;
-	}
+	class DynamicDto {}
+	Object.defineProperty(DynamicDto, 'schema', {
+		value: schema,
+		writable: false,
+		configurable: false,
+		enumerable: true,
+	});
 
 	for (const key of keys) {
 		const property = input?.properties?.[key];

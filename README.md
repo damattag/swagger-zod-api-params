@@ -5,7 +5,7 @@
 [![tests](https://img.shields.io/badge/tests-passing-brightgreen)](./tests)
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](./coverage)
 
-A NestJS decorator library that generates Swagger `@ApiQuery`, `@ApiParam`, and `@ApiBody` decorators from OpenAPI-compatible object schemas. It remains compatible with schemas produced by [Zod](https://zod.dev).
+A NestJS library that seamlessly integrates Zod with Swagger. Generate type-safe DTOs, automate OpenAPI documentation, and enforce runtime validation with minimal effort.
 
 ## Installation
 
@@ -18,109 +18,118 @@ npm install nest-swagger-zod
 Make sure the following packages are installed in your project:
 
 ```bash
-npm install @nestjs/common @nestjs/swagger
+npm install @nestjs/common @nestjs/swagger zod
 ```
 
-## Usage
+## Features
 
-Pass an OpenAPI-compatible object schema to `ApiQueryParams`:
+### 1. Type-safe DTOs with `createZodDto`
+
+Automatically generate NestJS DTO classes from Zod schemas. These classes are fully compatible with `@nestjs/swagger` and preserve TypeScript types.
 
 ```typescript
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQueryParams, OpenApiObjectSchema } from 'nest-swagger-zod';
+import { createZodDto } from 'nest-swagger-zod';
+import { z } from 'zod';
 
-const SearchSchema: OpenApiObjectSchema = {
-  type: 'object',
-  properties: {
-    page: { type: 'integer', default: 1, description: 'Page number' },
-    limit: { type: 'integer', default: 20, description: 'Items per page' },
-    status: {
-      type: 'string',
-      enum: ['active', 'inactive'],
-      description: 'Filter by status',
+const CreateUserSchema = z.object({
+  name: z.string().describe('User name'),
+  email: z.string().email().describe('User email'),
+  age: z.number().int().min(18).optional().describe('User age'),
+});
+
+export type CreateUserSchema = z.infer<typeof CreateUserSchema>;
+
+export class CreateUserDto extends createZodDto<CreateUserSchema>(CreateUserSchema) {}
+```
+
+### 2. Global Validation with `ZodValidationPipe`
+
+Use the `ZodValidationPipe` to automatically validate incoming requests against your Zod DTOs. It can be applied globally, at the controller level, or on specific routes.
+
+**Global Setup:**
+
+```typescript
+import { APP_PIPE } from '@nestjs/core';
+import { ZodValidationPipe } from 'nest-swagger-zod';
+
+@Module({
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
     },
-  },
-};
+  ],
+})
+export class AppModule {}
+```
 
-@Controller('items')
-export class ItemsController {
-  @Get()
-  @ApiQueryParams(SearchSchema)
-  findAll(@Query() query: Record<string, unknown>) {
-    // ...
+**Controller Usage:**
+
+```typescript
+@Controller('users')
+export class UsersController {
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    // body is already validated and typed as CreateUserDto
+    return this.usersService.create(createUserDto);
   }
 }
 ```
 
-This will automatically register all schema fields as `@ApiQuery` parameters in your Swagger UI.
+### 3. Schema Decorators for Raw Schemas
 
-You can also apply the same schema directly to request bodies with `ApiBodyParams`:
+If you prefer using raw OpenAPI/JSON schemas, you can use the provided decorators to automate Swagger documentation.
+
+#### `ApiQueryParams`
 
 ```typescript
-import { ApiBodyParams, OpenApiObjectSchema } from 'nest-swagger-zod';
+@Get()
+@ApiQueryParams(SearchSchema)
+findAll(@Query() query: any) { ... }
+```
 
-const CreateItemSchema: OpenApiObjectSchema = {
-  type: 'object',
-  required: ['name'],
-  properties: {
-    name: { type: 'string', description: 'Item name' },
-    status: { type: ['string', 'null'], enum: ['active', 'inactive'] },
-  },
-};
+#### `ApiBodyParams`
 
+```typescript
 @Post()
 @ApiBodyParams(CreateItemSchema)
-create(@Body() body: Record<string, unknown>) {
-  // ...
-}
+create(@Body() body: any) { ... }
 ```
 
-For route params, use `ApiPathParams`:
+#### `ApiPathParams`
 
 ```typescript
-import { ApiPathParams, OpenApiObjectSchema } from 'nest-swagger-zod';
-
-const PathSchema: OpenApiObjectSchema = {
-  type: 'object',
-  required: ['id'],
-  properties: {
-    id: { type: 'string', format: 'uuid', description: 'Item id' },
-    version: { type: 'integer', description: 'Version number' },
-  },
-};
-
-@Get(':id/:version')
+@Get(':id')
 @ApiPathParams(PathSchema)
-findOne(@Param() params: Record<string, unknown>) {
-  // ...
-}
+findOne(@Param('id') id: string) { ... }
 ```
 
-If you already use Zod, you can keep using `z.toJSONSchema(...)` and pass the result directly.
+## API Reference
 
-## API
+### `createZodDto(schema: ZodType)`
 
-### `ApiQueryParams(jsonSchema: OpenApiObjectSchema)`
+Creates a class that you can extend to create a NestJS DTO. 
+- Automatically applies `@ApiProperty()` and `@ApiPropertyOptional()` based on the Zod schema.
+- Attaches the original Zod schema to a static `schema` property for use with the validation pipe.
 
-A method decorator that reads the `properties` of a JSON Schema object and applies an `@ApiQuery` decorator for each property.
+### `ZodValidationPipe`
 
-- Required fields are inferred from the schema's `required` array.
-- Fields with a `default` value are marked as optional in Swagger.
-- Supports `description`, `enum`, `format`, and `default` schema properties.
+A NestJS pipe that performs validation using Zod.
+- If the target `metatype` is a class created with `createZodDto`, it uses the attached Zod schema to validate the input.
+- Throws `ZodError` on validation failure.
+- Safely ignores primitive types (String, Number, etc.) when applied globally.
 
-### `ApiBodyParams(jsonSchema: OpenApiObjectSchema)`
+### `ApiQueryParams(schema: OpenApiObjectSchema)`
 
-A method decorator that applies the full object schema as an `@ApiBody` schema.
+Method decorator that applies `@ApiQuery` decorators for each property in the provided schema.
 
-- Preserves schema metadata while normalizing nullable union types (`['type', 'null']`) into `type + nullable: true`.
-- Keeps required fields from the schema, excluding fields that have a `default` value.
+### `ApiBodyParams(schema: OpenApiObjectSchema)`
 
-### `ApiPathParams(jsonSchema: OpenApiObjectSchema)`
+Method decorator that applies the full schema to an `@ApiBody` decorator.
 
-A method decorator that reads the `properties` of a JSON Schema object and applies an `@ApiParam` decorator for each property.
+### `ApiPathParams(schema: OpenApiObjectSchema)`
 
-- Required fields are inferred from the schema's `required` array.
-- Supports `description`, `enum`, and `format` schema properties.
+Method decorator that applies `@ApiParam` decorators for each property in the provided schema.
 
 ## License
 
