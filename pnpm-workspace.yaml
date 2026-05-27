@@ -1,2 +1,0 @@
-overrides:
-  nest-swagger-zod: link:../../.local/share/pnpm/global/5/node_modules/nest-swagger-zod
