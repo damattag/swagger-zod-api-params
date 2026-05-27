@@ -41,17 +41,18 @@
 	},
 	"peerDependencies": {
 		"@nestjs/common": ">=10",
-		"@nestjs/swagger": ">=7"
+		"@nestjs/swagger": ">=7",
+		"zod": ">=4"
 	},
 	"dependencies": {
 		"@nestjs/common": ">=10",
-		"@nestjs/swagger": ">=7"
+		"@nestjs/swagger": ">=7",
+		"zod": ">=4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.15",
 		"@vitest/coverage-v8": "4.1.6",
 		"typescript": "6.0.3",
-		"vitest": "4.1.6",
-		"zod": "4.4.3"
+		"vitest": "4.1.6"
 	}
 }
