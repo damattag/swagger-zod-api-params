@@ -93,7 +93,10 @@ describe('ApiBodyParams', () => {
 		it('accepts a Zod generated JSON schema', () => {
 			const zodSchema = z.object({
 				name: z.string().min(1).describe('Name'),
-				status: z.enum(['active', 'inactive']).describe('Filter status').optional(),
+				status: z
+					.enum(['active', 'inactive'])
+					.describe('Filter status')
+					.optional(),
 				page: z.number().int().default(1).describe('Page number'),
 			});
 
