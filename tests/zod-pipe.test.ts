@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
-import { z } from 'zod';
+import { ZodError, z } from 'zod';
 import { createZodDto } from '../src/create-zod-dto';
 import { ZodValidationPipe } from '../src/zod-pipe';
 
@@ -21,7 +20,7 @@ describe('ZodValidationPipe', () => {
 		expect(pipe.transform(value, metadata)).toEqual(value);
 	});
 
-	it('should throw BadRequestException when validation fails', () => {
+	it('should throw ZodError when validation fails', () => {
 		const schema = z.object({
 			name: z.string(),
 			age: z.number(),
@@ -32,10 +31,10 @@ describe('ZodValidationPipe', () => {
 		const value = { name: 'John', age: 'invalid' };
 		const metadata = { metatype: TestDto, type: 'body' } as any;
 
-		expect(() => pipe.transform(value, metadata)).toThrow(BadRequestException);
+		expect(() => pipe.transform(value, metadata)).toThrow(ZodError);
 	});
 
-	it('should include detailed error messages in BadRequestException', () => {
+	it('should include detailed error messages in ZodError', () => {
 		const schema = z.object({
 			email: z.string().email(),
 			count: z.number().min(1),
@@ -49,16 +48,14 @@ describe('ZodValidationPipe', () => {
 		try {
 			pipe.transform(value, metadata);
 		} catch (error: any) {
-			expect(error).toBeInstanceOf(BadRequestException);
-			const response = error.getResponse();
-			expect(response.message).toBe('Validation failed');
-			expect(response.errors).toHaveLength(2);
-			expect(response.errors[0]).toMatchObject({
-				path: 'email',
-				code: 'invalid_format',
+			expect(error).toBeInstanceOf(ZodError);
+			const issues = error.issues;
+			expect(issues).toHaveLength(2);
+			expect(issues[0]).toMatchObject({
+				path: ['email'],
 			});
-			expect(response.errors[1]).toMatchObject({
-				path: 'count',
+			expect(issues[1]).toMatchObject({
+				path: ['count'],
 				code: 'too_small',
 			});
 		}
@@ -69,5 +66,19 @@ describe('ZodValidationPipe', () => {
 		const metadata = { metatype: class {}, type: 'body' } as any;
 
 		expect(() => pipe.transform(value, metadata)).toThrow('Schema not found');
+	});
+
+	it('should return value when metatype is primitive', () => {
+		const value = 'test';
+		const metadata = { metatype: String, type: 'body' } as any;
+
+		expect(pipe.transform(value, metadata)).toBe(value);
+	});
+
+	it('should return value when metatype is undefined', () => {
+		const value = { name: 'John' };
+		const metadata = { metatype: undefined, type: 'body' } as any;
+
+		expect(pipe.transform(value, metadata)).toBe(value);
 	});
 });
